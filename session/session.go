@@ -19,12 +19,17 @@ import (
 
 type Session struct {
 	db       *sql.DB
+	tx       *sql.Tx
 	refTable *schema.Schema
 	dialect  dialect.Dialect
 	clause   clause.Clause
 	sql      strings.Builder
 	sqlVars  []interface{}
 }
+
+//检查是否实现了CommonDB
+var _ CommonDB = (*sql.DB)(nil)
+var _ CommonDB = (*sql.Tx)(nil)
 
 func NewSession(db *sql.DB, d dialect.Dialect) (*Session, error) {
 	return &Session{
@@ -33,7 +38,16 @@ func NewSession(db *sql.DB, d dialect.Dialect) (*Session, error) {
 	}, nil
 }
 
-func (s *Session) DB() *sql.DB {
+type CommonDB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+func (s *Session) DB() CommonDB {
+	if s.tx != nil {
+		return s.tx
+	}
 	return s.db
 }
 
