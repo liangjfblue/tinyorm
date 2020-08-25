@@ -126,6 +126,11 @@ func (o *Engine) Migrate(value interface{}) error {
 		tmpTableName := "tmp_" + table.Name
 		fieldsStr := strings.Join(table.FieldNames, ",")
 		s.Raw(fmt.Sprintf(
+			"DROP TABLE IF EXISTS %s;",
+			tmpTableName,
+		))
+
+		s.Raw(fmt.Sprintf(
 			"CREATE TABLE %s AS SELECT %s FROM %s;",
 			tmpTableName,
 			fieldsStr,
@@ -133,11 +138,11 @@ func (o *Engine) Migrate(value interface{}) error {
 		))
 
 		s.Raw(fmt.Sprintf(
-			"DROP TABLE %s",
+			"DROP TABLE %s;",
 			table.Name,
 		))
 
-		s.Raw(fmt.Sprintf("ALTER TABLE %s RENAME TO %s", tmpTableName, table.Name))
+		s.Raw(fmt.Sprintf("ALTER TABLE %s RENAME TO %s;", tmpTableName, table.Name))
 
 		_, err = s.Exec()
 

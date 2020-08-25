@@ -13,8 +13,8 @@ func DiffSlice(old, new []string) (diff []string) {
 	}
 
 	for _, s := range new {
-		if v, ok := m[s]; !ok {
-			diff = append(diff, v)
+		if _, ok := m[s]; !ok {
+			diff = append(diff, s)
 		}
 	}
 	return diff
